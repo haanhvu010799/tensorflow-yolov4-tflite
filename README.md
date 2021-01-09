@@ -1,24 +1,10 @@
-# tensorflow-yolov4-tflite
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE)
 
-YOLOv4, YOLOv4-tiny Implemented in Tensorflow 2.0. 
-Convert YOLO v4, YOLOv3, YOLO tiny .weights to .pb, .tflite and trt format for tensorflow, tensorflow lite, tensorRT.
-<p align="center"><img src="data/helpers/demo.gif"\></p>
+<h2>Convert từ file .weights của Darknet sang Tensorflow</h2>
+## Cách cài đặt
 
-## Getting Started
-### Conda (Recommended)
-
-```bash
-# Tensorflow CPU
-conda env create -f conda-cpu.yml
-conda activate yolov4-cpu
-
-# Tensorflow GPU
-conda env create -f conda-gpu.yml
-conda activate yolov4-gpu
 ```
 
-### Pip
+### Pip (tốt nhất nên cài 2 phiên bản, vì Jetson Nano chỉ dùng CPU)
 ```bash
 # TensorFlow CPU
 pip install -r requirements.txt
@@ -26,37 +12,9 @@ pip install -r requirements.txt
 # TensorFlow GPU
 pip install -r requirements-gpu.txt
 ```
-### Nvidia Driver (For GPU, if you are not using Conda Environment and haven't set up CUDA yet)
-Make sure to use CUDA Toolkit version 10.1 as it is the proper version for the TensorFlow version used in this repository.
-https://developer.nvidia.com/cuda-10.1-download-archive-update2
 
-### Performance
-Check out how YOLOv4 compares to other object detection systems.
 
-<p align="center"><img src="data/helpers/performance.png" width="640"\></p>
-
-## Downloading Official Pre-trained Weights
-YOLOv4 comes pre-trained and able to detect 80 classes. For easy demo purposes we will use the pre-trained weights.
-Download pre-trained yolov4.weights file: https://drive.google.com/open?id=1cewMfusmPjYWbrnuJRuKhPMwRe_b9PaT
-
-Copy and paste yolov4.weights from your downloads folder into the 'data' folder of this repository.
-
-If you want to use yolov4-tiny.weights, a smaller model that is faster at running detections but less accurate, download file here: https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v4_pre/yolov4-tiny.weights
-
-## Using Custom Trained YOLOv4 Weights
-<strong>Learn How To Train Custom YOLOv4 Weights here: https://www.youtube.com/watch?v=mmj3nxGT2YQ </strong>
-
-USE MY LICENSE PLATE TRAINED CUSTOM WEIGHTS: https://drive.google.com/file/d/1EUPtbtdF0bjRtNjGv436vDY28EN5DXDH/view?usp=sharing
-
-Copy and paste your custom .weights file into the 'data' folder and copy and paste your custom .names into the 'data/classes/' folder.
-
-The only change within the code you need to make in order for your custom model to work is on line 14 of 'core/config.py' file.
-Update the code to point at your custom .names file as seen below. (my custom .names file is called custom.names but yours might be named differently)
-<p align="center"><img src="data/helpers/custom_config.png" width="640"\></p>
-
-<strong>Note:</strong> If you are using the pre-trained yolov4 then make sure that line 14 remains <strong>coco.names</strong>.
-
-## YOLOv4 Using Tensorflow (tf, .pb model)
+## Cách chạy Model (tf, .pb model)
 To implement YOLOv4 using TensorFlow, first we convert the .weights into the corresponding TensorFlow model files and then run the model.
 ```bash
 # Convert darknet weights to tensorflow

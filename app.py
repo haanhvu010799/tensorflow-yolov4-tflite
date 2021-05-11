@@ -41,6 +41,7 @@ def index():
     """Video streaming home page."""
     return render_template('index.html')
 def guiemail():
+    # chạy python -m smtpd -c DebuggingServer -n localhost:1025 trước khi chạy code
     sender_email = "phanmemquanlynail@gmail.com"
     receiver_email = "haanhvu010799@gmail.com"
     password = "Vuhaanh1999"

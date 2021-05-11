@@ -12,11 +12,20 @@ import cv2
 import numpy as np
 from shutil import copyfile
 import shutil
-import os, glob
+import os, glob , math
 import time
+import winsound
+import email, smtplib, ssl
+
+from email import encoders
+from email.mime.base import MIMEBase
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+
 from tensorflow.compat.v1 import ConfigProto
 from tensorflow.compat.v1 import InteractiveSession
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, flash
 
 framework="tflite"  #tf, tflite, trt
 model="yolov4"  #yolov3 or yolov4
@@ -31,7 +40,66 @@ app = Flask(__name__)
 def index():
     """Video streaming home page."""
     return render_template('index.html')
+def guiemail():
+    sender_email = "phanmemquanlynail@gmail.com"
+    receiver_email = "haanhvu010799@gmail.com"
+    password = "Vuhaanh1999"
 
+    message = MIMEMultipart("alternative")
+    message["Subject"] = "Canh bao hoa hoan"
+    message["From"] = sender_email
+    message["To"] = receiver_email
+
+    text = """\
+    Co Hoa Hoan"""
+    html = """\
+    <html>
+    <body>
+        <h1>Canh Bao<br>
+        Co Hoa Hoan xay ra<br>
+        </h1>
+        <img src="detect.png">
+    </body>
+    </html>
+    """
+
+    filename = "detect.png"  # In same directory as script
+
+    # Open PDF file in binary mode
+    with open(filename, "rb") as attachment:
+        # Add file as application/octet-stream
+        # Email client can usually download this automatically as attachment
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload(attachment.read())
+
+    # Encode file in ASCII characters to send by email    
+    encoders.encode_base64(part)
+
+    # Add header as key/value pair to attachment part
+    part.add_header(
+        "Content-Disposition",
+        f"attachment; filename= {filename}",
+    )
+
+# Add attachment to message and convert message to string
+    message.attach(part)
+    
+    # Turn these into plain/html MIMEText objects
+    part1 = MIMEText(text, "plain")
+    part2 = MIMEText(html, "html")
+
+    # Add HTML/plain-text parts to MIMEMultipart message
+    # The email client will try to render the last part first
+    message.attach(part1)
+    message.attach(part2)
+    text = message.as_string()
+    # Create secure connection with server and send email
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(
+            sender_email, receiver_email, message.as_string()
+        )
 def gen():
     config = ConfigProto()
     config.gpu_options.allow_growth = True
@@ -53,14 +121,16 @@ def gen():
     
     # if output:
     #     # by default VideoCapture returns float instead of int
-    #     width = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
-    #     height = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+       
     #     fps = int(vid.get(cv2.CAP_PROP_FPS))
     #     codec = cv2.VideoWriter_fourcc(*output_format)
     #     out = cv2.VideoWriter(output, codec, fps, (width, height))
 
     frame_id = 0
+    count = 0
+    status = 2
     while (vid.isOpened()):
+    
         return_value, frame = vid.read()
         if return_value:
             frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
@@ -79,13 +149,17 @@ def gen():
         image_data = image_data / 255.
         image_data = image_data[np.newaxis, ...].astype(np.float32)
         prev_time = time.time()
+        
+        
+
 
         if framework == 'tflite':
             interpreter.set_tensor(input_details[0]['index'], image_data)
             interpreter.invoke()
             pred = [interpreter.get_tensor(output_details[i]['index']) for i in range(len(output_details))]
-            boxes, pred_conf = filter_boxes(pred[0], pred[1], score_threshold=0.25,input_shape=tf.constant([input_size, input_size]))                                                                  
-            print('Fire')    
+            boxes, pred_conf = filter_boxes(pred[0], pred[1], score_threshold=0.25,input_shape=tf.constant([input_size, input_size])) 
+                                                            
+               
                            
         else:
             batch_data = tf.constant(image_data)
@@ -112,15 +186,43 @@ def gen():
         print(info)
         fps = int(vid.get(cv2.CAP_PROP_FPS))
         print("FPS: {0}".format(fps))
+        width = int(vid.get(cv2.CAP_PROP_FRAME_WIDTH))
+        height = int(vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+        print("Pred: {0}".format(pred_conf))
+           
+          # Canh bao 
+        if (pred_conf.numpy().sum() > 0): 
+            count= count + 1
+            cv2.rectangle(frame, (0,0), (width,height), (255,0,0), 50)
+            cv2.putText(frame,'Co Lua',(int(width/32),int(height/8)),
+                cv2.FONT_HERSHEY_SIMPLEX, 4,(255,255,255),10,cv2.LINE_AA);
+            if(count>40):   
+                status= status -1
+                print('Email canh bao da duoc gui')
+                if(status == 1):
+                    guiemail()
+                count = 0
+            
+                    
+        else:
+            cv2.rectangle(frame, (0,0), (width,height), (0,255,0), 50)
+            cv2.putText(frame,'Khong Lua',(int(width/32),int(height/8)),
+                cv2.FONT_HERSHEY_SIMPLEX, 4,(255,255,255),10,cv2.LINE_AA);   
+
         
-        result = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)  
+        result = cv2.cvtColor(image, cv2.COLOR_RGB2BGR) 
+        
+
         # cv2.namedWindow("result", cv2.WINDOW_AUTOSIZE)
         # cv2.imshow("result", result)
-        cv2.imwrite('demo.jpg', result)
+        #cv2.imwrite('demo.jpg', result)
+        cv2.imwrite('detect.png', result)
         yield (b'--frame\r\n'
-               b'Content-Type: image/jpeg\r\n\r\n' + open('demo.jpg', 'rb').read() + b'\r\n')
+               b'Content-Type: image/jpeg\r\n\r\n' + open('detect.png', 'rb').read() + b'\r\n')
         if cv2.waitKey(1) & 0xFF == ord('q'): break
+
 # def result():
+    
 #     result = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)  
 #     cv2.namedWindow("result", cv2.WINDOW_AUTOSIZE)
 #     cv2.imshow("result", result)
@@ -128,6 +230,7 @@ def gen():
 #         # if output:
 #         #     out.write(result)
 #     frame_id += 1
+           
            
 @app.route('/video_feed')
 def video_feed():
@@ -138,3 +241,4 @@ def video_feed():
 
 if __name__ == '__main__':
     app.run(debug=True)
+    

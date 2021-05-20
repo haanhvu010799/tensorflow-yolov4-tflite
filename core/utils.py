@@ -80,11 +80,15 @@ def read_class_names(class_file_name):
     return names
 
 def load_config():
-    
-    STRIDES = np.array(cfg.YOLO.STRIDES_TINY)
-    ANCHORS = get_anchors(cfg.YOLO.ANCHORS_TINY)
-    XYSCALE = cfg.YOLO.XYSCALE_TINY 
-    NUM_CLASS = len(read_class_names(cfg.YOLO.CLASSES))
+    if FLAGS.tiny:
+        STRIDES = np.array(cfg.YOLO.STRIDES_TINY)
+        ANCHORS = get_anchors(cfg.YOLO.ANCHORS_TINY, FLAGS.tiny)
+        XYSCALE = cfg.YOLO.XYSCALE_TINY if FLAGS.model == 'yolov4' else [1, 1]
+    else: 
+        STRIDES = np.array(cfg.YOLO.STRIDES_TINY)
+        ANCHORS = get_anchors(cfg.YOLO.ANCHORS_TINY)
+        XYSCALE = cfg.YOLO.XYSCALE_TINY 
+        NUM_CLASS = len(read_class_names(cfg.YOLO.CLASSES))
 
 
     return STRIDES, ANCHORS, NUM_CLASS, XYSCALE

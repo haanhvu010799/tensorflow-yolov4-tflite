@@ -79,7 +79,7 @@ def read_class_names(class_file_name):
             names[ID] = name.strip('\n')
     return names
 
-def load_config():
+def load_config(FLAGS):
     if FLAGS.tiny:
         STRIDES = np.array(cfg.YOLO.STRIDES_TINY)
         ANCHORS = get_anchors(cfg.YOLO.ANCHORS_TINY, FLAGS.tiny)

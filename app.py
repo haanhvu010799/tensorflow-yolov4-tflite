@@ -126,10 +126,11 @@ def gen():
     #     fps = int(vid.get(cv2.CAP_PROP_FPS))
     #     codec = cv2.VideoWriter_fourcc(*output_format)
     #     out = cv2.VideoWriter(output, codec, fps, (width, height))
-
+   
     frame_id = 0
     count = 0
     status = 2
+    
     while (vid.isOpened()):
     
         return_value, frame = vid.read()
@@ -195,7 +196,7 @@ def gen():
         if (pred_conf.numpy().sum() > 0): 
             count= count + 1
             cv2.rectangle(frame, (0,0), (width,height), (255,0,0), 50)
-            cv2.putText(frame,'Co Lua',(int(width/32),int(height/8)),
+            cv2.putText(frame,'Fire',(int(width/32),int(height/16)),
                 cv2.FONT_HERSHEY_SIMPLEX, 4,(255,255,255),10,cv2.LINE_AA);
             if(count>40):   
                 status= status -1
@@ -203,11 +204,11 @@ def gen():
                 if(status == 1):
                     guiemail()
                 count = 0
-            
+                
                     
         else:
             cv2.rectangle(frame, (0,0), (width,height), (0,255,0), 50)
-            cv2.putText(frame,'Khong Lua',(int(width/32),int(height/8)),
+            cv2.putText(frame,'No Fire',(int(width/32),int(height/16)),
                 cv2.FONT_HERSHEY_SIMPLEX, 4,(255,255,255),10,cv2.LINE_AA);   
 
         
